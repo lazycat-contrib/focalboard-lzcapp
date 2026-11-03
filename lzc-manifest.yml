@@ -1,0 +1,41 @@
+application:
+  subdomain: focalboard
+  multi_instance: false
+  upstreams:
+    - location: /package-licenses/
+      backend: file:///lzcapp/pkg/content/licenses/
+    - location: /
+      backend: http://focalboard:8000/
+
+services:
+  focalboard:
+    # upstream: mattermost/focalboard:7.11.4
+    image: docker.1ms.run/mattermost/focalboard:7.11.4
+    environment:
+      - TZ=Asia/Shanghai
+    binds:
+      # the SQLite database and uploaded attachments live here
+      - /lzcapp/var/data:/opt/focalboard/data
+
+usage: |
+  Focalboard 是看板与任务管理工具：用卡片、列表和泳道组织工作，可自托管的 Trello / Notion 看板替代品。
+
+  使用方法：
+  1. 打开应用，第一次会进入注册页。**第一个注册的账号建立根团队**，
+     注册入口随后自动关闭（源码里注册前会检查用户数，已有用户则拒绝），
+     之后要给同事开账号，请在团队设置里生成邀请链接。
+  2. 新建 Board，用 Card 记录任务，拖到不同列表示不同阶段。
+  3. 支持给卡片加属性、附件、检查清单和评论，也可以按属性筛选、切换看板/表格视图。
+
+  数据与安全：
+  - 数据库和附件都在 /lzcapp/var/data，卸载会一并删除，重要看板请定期导出。
+  - 没有内置账号，也不存在默认口令；首个账号由你自己注册。
+  - 注册入口在首个用户建立后自动失效，不会出现陌生人在你之后注册进来。
+  - 应用经懒猫入口鉴权访问。
+
+  说明：
+  - 单容器 + 内置 SQLite，不需要额外数据库。
+  - 上游项目已停止主要开发（Mattermost 把重心转向 Boards），版本停留在 7.11.4，
+    功能完整可用但不会有新特性；介意的话可以先用着再迁。
+  - 未做真机验证：注册首个账号、建看板、上传附件以及重启后数据留存
+    均未在设备上实测。
